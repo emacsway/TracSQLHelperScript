@@ -26,7 +26,7 @@ class SQLHelper(object):
                 cursor = db.cursor()
                 cursor.execute(sql, params)
                 _data = self.actions(cursor)
-            except Exception, e:
+            except Exception as e:
                 env.log.error("""There was a problem executing sql:%s
     with parameters:%s
     Exception:%s""" %(sql, params, e))
@@ -103,7 +103,7 @@ def create_table(env, table):
         execute_non_query(env, stmt)
 
 def insert_row_from_dict(env, table, dictionary):
-    items = dictionary.items()
+    items = list(dictionary.items())
     # XXX this might be slightly retarded
     keys = [str(item[0]) for item in items]
 #    values = ["'%s'" % str(item[1]) for item in items]
@@ -113,7 +113,7 @@ def insert_row_from_dict(env, table, dictionary):
     execute_non_query(env, sql, *values)
 
 def update_row_from_dict(env, table, key, value, dictionary):
-    items = dictionary.items()
+    items = list(dictionary.items())
     # XXX this might be slightly retarded
     sql = "UPDATE %s SET %s WHERE %s='%s'"
     sql = sql % ( table, 
@@ -136,7 +136,7 @@ def insert_update(env, table, key, value, items=None):
 def columns(env, table):
     all = get_all_dict(env, "SELECT * FROM %s LIMIT 1" % table)
     assert all, 'NEED AT LEAST ONE ROW!  IF I KNEW SQL BETTER THEN I COULD PROBABLY GET AROUND THIS!'
-    return all[0].keys()
+    return list(all[0].keys())
 
 def column_type(env, table, column):
     """returns type of the column in the table"""
@@ -148,7 +148,7 @@ def column_type(env, table, column):
 
 def column_repr(env, table, column, value):
     """returns SQL repr for the column in a table"""
-    reprs = { unicode: "'%s'",
+    reprs = { str: "'%s'",
               str: "'%s'",
               int: "%d"
               }
